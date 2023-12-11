@@ -1,4 +1,5 @@
-﻿using spoofy.streaming.application.Dto;
+﻿using spoofy.core;
+using spoofy.streaming.application.Dto;
 using spoofy.streaming.repository;
 using Streaming.domain.Aggregates;
 using System;
@@ -11,7 +12,7 @@ namespace spoofy.streaming.application
 {
     public class BandaService
     {
-        private BandaRepository Repository = new BandaRepository();
+        public BandaRepository Repository = new BandaRepository();
         public BandaService() { }
 
         public BandaDto Criar(BandaDto dto)
@@ -118,6 +119,108 @@ namespace spoofy.streaming.application
                 Id = musica.Id,
                 Nome = musica.Nome
             };
+        }
+        public AlbumDto ObterAlbum(Guid idAlbum)
+        {
+            var album = Repository.ObterAlbum(idAlbum);
+
+
+            if (album == null)
+                return null;
+
+            AlbumDto albumDto = new AlbumDto()
+            {
+                Id = album.Id,
+                Nome = album.Nome,
+                Musicas = new List<MusicaDto>()
+            };
+
+            album.Musicas?.ForEach(m =>
+            {
+                albumDto.Musicas.Add(new MusicaDto()
+                {
+                    Id = m.Id,
+                    Duracao = m.Duracao,
+                    Nome = m.Nome
+                });
+            });
+
+            return albumDto;
+        }
+
+
+        public void AtualizarBanda(Guid idBanda, BandaDto dto)
+        {
+            var banda = Repository.ObterBanda(idBanda);
+            
+            if (banda == null)
+            {
+                throw new BusinessException(new BusinessValidation()
+                {
+                    ErrorMessage = "Nao encontrei banda",
+                    ErrorName = nameof(AtualizarBanda)
+                });
+            }
+
+            banda.Nome = dto.Nome;
+            banda.Genero = dto.Genero;
+            banda.Descricao = dto.Descricao;
+            Repository.UpdateBanda(banda);
+        }
+
+        public List<object> SearchQuery(string query)
+        {
+            var bandas = Repository.GetBandas();
+            query = query.ToLower();
+            List<object> results = new List<object>();
+
+            foreach (var banda in bandas)
+            {
+                var bandaDto = new BandaQueryDto()
+                {
+                    Id = banda.Id,
+                    Nome = banda.Nome,
+                    Genero = banda.Genero
+                };
+                var albums = banda.Albums;
+                foreach (var album in albums)
+                {
+                    var albumDto = new AlbumQueryDto()
+                    {
+                        Id = album.Id,
+                        Nome = album.Nome,
+                        Banda = banda.Nome
+                    };
+                    var musicas = album.Musicas;
+                    
+                    foreach (var musica in musicas)
+                    {
+                        var musicaDto = new MusicaQueryDto()
+                        {
+                            Duracao = musica.Duracao,
+                            Id = musica.Id,
+                            Nome = musica.Nome,
+                            Banda = banda.Nome,
+                            Album = album.Nome
+                        };
+
+                        if (musica.Nome.ToLower().Contains(query))
+                        {
+                            results.Add(musicaDto);
+                        }
+                    }
+
+                    if (album.Nome.ToLower().Contains(query))
+                    {
+                        results.Add(albumDto);
+                    }
+                }
+                if (banda.Nome.ToLower().Contains(query))
+                {
+                    results.Add(bandaDto); 
+                }
+            }
+            return results;
         }
     }
 }

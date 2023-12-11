@@ -9,25 +9,44 @@ namespace spoofy.streaming.repository
 {
     public class PlanoRepository
     {
-        private static List<Plano> Plano;
+        private static List<Plano> Planos;
         public PlanoRepository()
         {
-            if (Plano == null)
+            if (Planos == null)
             {
-                Plano = new List<Plano>();
-                Plano.Add(new Plano()
+                Planos = new List<Plano>();
+                Planos.Add(new Plano()
                 {
-                    Descricao = "Plano Basico",
-                    Nome = "Plano Basico",
-                    Valor = 19.90M,
+                    Descricao = "Plano inicial gratis para quem acabou de criar a sua conta, direito a musicas ilimitadas com anuncio",
+                    Nome = "Spoofy Basic",
+                    Valor = 0M,
                     Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66afa6")
                 });
             }
         }
 
+        public void SalvarPlano(Plano plano)
+        {
+            plano.Id = Guid.NewGuid();
+            Planos.Add(plano);
+        }
+
         public Plano PlanoPorId(Guid id)
         {
-            return Plano.FirstOrDefault(x => x.Id == id);
+            return Planos.FirstOrDefault(x => x.Id == id);
+        }
+
+        public List<Plano> GetPlanos()
+        {
+            var planos = Planos;
+            return planos;
+        }
+
+        public void Update(Plano plano)
+        {
+            Plano planoOld = PlanoPorId(plano.Id);
+            Planos.Remove(planoOld);
+            Planos.Add(plano);
         }
     }
 }

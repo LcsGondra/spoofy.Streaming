@@ -18,7 +18,7 @@ namespace spoofy.streaming.API.Controllers
             if (ModelState.IsValid == false)
                 return BadRequest(ModelState);
 
-            this._service.Criar(dto);
+            _service.Criar(dto);
 
             return Created($"/banda/{dto.Id}", dto);
         }
@@ -34,7 +34,7 @@ namespace spoofy.streaming.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("musica/{id}")]
+        [HttpGet("Musica/{id}")]
         public IActionResult ObterMusica(Guid id)
         {
             var result = this._service.ObterMusica(id);
@@ -44,5 +44,26 @@ namespace spoofy.streaming.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("Album/{id}")]
+        public IActionResult ObterAlbum(Guid id)
+        {
+            var result = this._service.ObterAlbum(id);
+
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+
+        [HttpPut("{id}/Atualizar")]
+        public IActionResult UpdateBanda(Guid id, BandaDto dto)
+        {
+            _service.AtualizarBanda(id, dto);
+
+            return Created($"/banda/{id}", dto);
+        }
+
     }
 }

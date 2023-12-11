@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,12 +26,47 @@ namespace spoofy.streaming.repository
 
         public Musica ObterMusica(Guid idMusica)
         {
-            return Bandas.Select(x =>
+            Musica result = null;
+
+            foreach (var banda in Bandas)
             {
-                return (from y in x.Albums
-                        select y.Musicas.FirstOrDefault(m => m.Id == idMusica))
-                       .FirstOrDefault();
-            }).FirstOrDefault();
+                foreach (var album in banda.Albums)
+                {
+                    result = album.Musicas.FirstOrDefault(x => x.Id == idMusica);
+
+                    if (result != null)
+                        break;
+                }
+            }
+
+            return result;
+        }
+
+        public Album ObterAlbum(Guid idAlbum)
+        {
+            Album result = null;
+            foreach (var banda in Bandas)
+            {
+                result = banda.Albums.FirstOrDefault(x => x.Id == idAlbum);
+
+                if (result != null)
+                    break;
+            }
+
+            return result;
+        }
+
+        public List<Banda> GetBandas()
+        {
+            var bandas = Bandas;
+            return bandas;
+        }
+
+        public void UpdateBanda(Banda banda)
+        {
+            Banda bandaOld = ObterBanda(banda.Id);
+            Bandas.Remove(bandaOld);
+            Bandas.Add(banda);
         }
     }
 }

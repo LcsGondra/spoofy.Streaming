@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using spoofy.streaming.application;
+using spoofy.streaming.application.Dto;
+using System.Security.Cryptography;
 
 namespace spoofy.streaming.API.Controllers
 {
@@ -15,6 +17,16 @@ namespace spoofy.streaming.API.Controllers
             this.service = new PlanoService();
         }
 
+        [HttpPost]
+        public IActionResult CriarPlano(PlanoDto planoDto)
+        {
+            if (ModelState.IsValid == false)
+                return BadRequest(ModelState);
+
+            service.CriarPlano(planoDto);
+
+            return Created($"/Plano/{planoDto.Id}", planoDto);
+        }
         [HttpGet("{id}")]
         public IActionResult GetPlano(Guid id) 
         {
@@ -25,6 +37,20 @@ namespace spoofy.streaming.API.Controllers
 
             return Ok(result);
 
+        }
+
+        [HttpGet("All")]
+        public IActionResult GetPlanos()
+        {
+            return Ok(service.PlanoRepository.GetPlanos());
+        }
+
+        [HttpPut("{id}/atualizar")]
+        public IActionResult AtualizarPlano(Guid id, PlanoDto planoDto)
+        {
+            service.AtualizarPlano(id, planoDto);
+
+            return Created($"/Plano/{id}", planoDto);
         }
     }
 }
